@@ -20,7 +20,9 @@ You must have these pacakges installed on your computer (preferably from Homebre
 
 - ``node``
 - ``npm``
+- ``yarn`` 
 
+(You can install with ``brew update && brew install node yarn``!)
 
 ## Content
 
@@ -32,5 +34,6 @@ Install ``create-react-app``, create an app, and run it:
 - ``mkdir ~/apps`` (change this to whatever you want)
 - ``create-react-app [your-app-name]`` -- change ``[your-app-name]`` to whatever you want
 - ``cd [your-app-name] && npm start``
+
 
 
