@@ -83,7 +83,7 @@ const Movies = [
   {
     poster_path: null,
     title: 'Black Panther',
-    overview: 'After the events of Captain America: Civil War, King T'Challa returns home to the reclusive, technologically advanced African nation of Wakanda to serve as his country's new leader. However, T'Challa soon finds that he is challenged for the throne from factions within his own country. When two foes conspire to destroy Wakanda, the hero known as Black Panther must team up with C.I.A. agent Everett K. Ross and members of the Dora Milaje, Wakandan special forces, to prevent Wakanda from being dragged into a world war. ',
+    overview: 'After the events of Captain America: Civil War, King T\'Challa returns home to the reclusive, technologically advanced African nation of Wakanda to serve as his country\'s new leader. However, T\'Challa soon finds that he is challenged for the throne from factions within his own country. When two foes conspire to destroy Wakanda, the hero known as Black Panther must team up with C.I.A. agent Everett K. Ross and members of the Dora Milaje, Wakandan special forces, to prevent Wakanda from being dragged into a world war. ',
     language: 'en',
     release_date: '2018-02-13',
     popularity: 327.127873
@@ -97,7 +97,7 @@ export default Movies;
 #### Building up ``app.js``
 
 - ``import Table from './components/Table'`` 
-- Remove boilerplat code from ``render`` in app.js and render a ``<Table></Table>``
+- Remove boilerplate code from ``render`` in app.js and render a ``<Table></Table>``
 - remove ``null`` and add below to return statement in the render function for ``Table`` component:
 
 ```
@@ -147,7 +147,7 @@ export default Movies;
 ```
 return (
   <tr>
-    <td><img src={ this.props.posterPath } ></td>
+    <td><img src={ this.props.posterPath } alt={ this.props.title }/></td>
     <td>{ this.props.title }</td>
     <td>{ this.props.overview }</td>
     <td>{ this.props.language }</td>
@@ -162,10 +162,13 @@ return (
 
 ### Part 3 -- bringing in data
 
+__This step can be found on branch ``api-driven-app``__
+
+
 Put real data into your react app using ``axios``, a fully-featured and reliable http client. Take advantage of component state.
 
 - ``npm add axios`` or ``yarn add axios`` 
-- ``import axios as Axios from 'axios';`` => ``App.js``
+- ``import Axios from 'axios';`` => ``App.js``
 - add react lifecycle method and state to app.js:
 
 ```
@@ -183,28 +186,35 @@ constructor(props) {
 componentDidMount() {
   Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018')
   .then ( res => {
-    this.setState({ movies: res.results })
+    this.setState({ movies: res.data.results })
   })
   .then ( () => {
     Axios.get(https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b)
     .then( res => {
-      this.setState({ imageUrl: res.images.base_url + res.images.poster_sizes[0], loading: false })
+      this.setState({ imageUrl: res.data.images.base_url + res.data.images.poster_sizes[0], loading: false })
     })
   })
   .catch ( err => ( return ));
 }
 ```
 
-- change references to ``Movies`` import as source of data to ``this.state.movies`` eg ``this.state.movies['poster_path']. Except for ``poster_path`` should be ``this.state.imageUrl + this.state.moves['poster_path']``. Be sure to change the map function to the new API state too.
-
+- change references to ``Movies`` import as source of data, and extract the items from state before using them (see below) to ``movies`` eg ``movies['poster_path']. Except for ``poster_path`` should be ``imageUrl + movies['poster_path']``. Be sure to change the map function to the new API state too.
 -- change render to conditionally load
 
 ``` 
 render () {
-  ...
-  if ( !this.state.loading ) {
+  const { movies, imageUrl, loading } = this.state;
+  if ( !loading ) {
     return (
-      ... previous code
+      movies.map ( el = > {
+          return (
+            <TableRow
+              posterPath = { imageUrl + el.poster_path }
+              ...
+            />
+          )
+        }
+      )
     )
   }
   return (
