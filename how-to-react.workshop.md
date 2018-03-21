@@ -225,7 +225,273 @@ render () {
 
 ![fullapp](assets/images/fullapp.png)
 
-### Part 4 -- adding redux and logic for another time...
+### Part 4 -- adding redux and redux-logic
+
+Next step is to remove API calls from components. Can be done in higher order components that are data driven, but prefer to remove business logic from components entirely. We need to introduce ``redux`` and ``redux-logic``
+
+![whatisredux](assets/images/whatisredux.png)
+
+
+#### setting up redux infrastructure
+
+- ``npm install redux redux-logic react-redux`` or ``yarn add redux redux-logic react-redux``
+- create a new file called ``Redux.js`` in file root and add:
+
+``` 
+// library dependencies
+import React, { Component } from 'react'
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createLogicMiddleware } from 'redux-logic';
+import { Provider } from 'react-redux';
+
+// component dependencies
+import App from './App.js';
+
+// root reducers and logic
+import { default as rootReducer } from './RootReducer';
+import { default as rootLogic } from './RootLogic';
+
+const initialState = {
+  Data: {
+    movies: null,
+    imageUrl: null
+    loading: false,
+    loaded: false,
+    error: false
+  }
+}
+
+const logicDependencies = {};
+
+const configureStore = () => {
+  const logicMiddleware = createLogicMiddleware(rootLogic, deps); // create logic middleware
+  const middleware = applyMiddleware(logicMiddleware); // apply middleware to redux dispatch
+  return createStore(rootReducer, initialState, middleware); // create the store
+}
+
+class Redux extends Component {
+  constructor(props) {
+    super(props);
+
+    this.store = configureStore();
+  }
+
+  render() {
+    return (
+      <Provider store={this.store}>
+        <App />
+      </Provider>
+    )
+  }
+}
+
+export default Redux;
+```
+
+- create a new file called ``App.reducer.js``. Contents:
+
+```
+// initial state
+const initialState = {
+}
+
+export default function appReducer(state = initialState, action) {
+  switch( action.type ) {
+    case 'GET_MOVIES': {
+      return {
+        ...state,
+        loading: true
+      }
+    }
+    case 'GET_MOVIES_SUCCESS': {
+      return {
+        ...state,
+        loaded: true,
+        loading: false,
+        movies: action.payload.movies,
+        imageUrl: action.payload.imageUrl,
+        error: false
+      }
+    }
+    case 'GET_MOVIES_FAIL': {
+      return {
+        ...state,
+        loaded: false,
+        loading: false,
+        error: true
+      }
+    }
+    default: {
+      return state
+    }
+  }
+}
+```
+
+- create a new file called ``App.logic.js``. Contents:
+
+```
+// library dependencies
+import { createLogic } from 'redux-logic';
+import Axios from 'axios';
+
+export const getMoviesLogic = createLogic(
+  {
+    type: 'GET_MOVIES',
+    validate: ({ action }, allow, reject) => { // always goes through to reducer
+      if ( action.type !== 'GET_MOVIES' ) {
+        reject();
+      }
+      allow(action);
+    },
+    process: ({ action }, dispatch, done) => { // side effects of action
+      Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018')
+      .then ( res => {
+        return res.data;
+      })
+      .then ( data => {
+        Axios.get('https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b')
+        .then ( res => {
+          dispatch({
+            type: 'GET_MOVIES_SUCCESS',
+            payload: {
+              movies: data.results,
+              imageUrl: res.data.images.base_url + res.data.images.poster_sizes[0]
+            }
+          })
+        })
+      })
+      .catch ( err => {
+        dispatch({
+          type: 'GET_MOVIES_FAIL',
+          payload: err.message,
+          err: true
+        })
+      }) 
+      .then( done() );
+  }
+)
+
+export const getMoviesSuccessLogic = createLogic(
+  {
+    type: 'GET_MOVIES_SUCCESS',
+    validate: ({ action }, allow, reject) => {
+      if ( action.type !== 'GET_MOVIES_SUCCESS' && !action.payload ) {
+        reject();
+      }
+      allow(action);
+    }
+  }
+)
+
+export default [
+  getMoviesLogic,
+  getMoviesSuccessLogic
+]
+```
+
+- create a new file called ``RootReducer.js``. Contents: 
+
+```
+// redux
+import { combineReducers } from 'redux'; 
+
+// import all your app reducers here
+import AppReducer from './App.reducer.js';
+
+export default combineReducers({
+  'Data': AppReducer
+}); 
+
+```
+
+- create a new file called ``RootLogic.js``. Contents:
+
+```
+import { default as AppLogic } from './App.logic.js';
+
+// export the array of logics here. actions will be passed to each in order
+export default [
+  ...AppLogic
+];
+```
+
+#### integrating redux
+
+- remove ``componentDidMount`` from ``<App />`` component.
+- remove state set up in ``consructor`` too.
+- add the following to ``App.js``:
+
+```
+import { connect } from 'react-redux';
+
+// other imports
+
+...
+
+
+@connect(
+  state => ({
+    Data: state.Data
+  }),
+  dispatch
+)
+... // component declaration
+
+```
+- add a ``loadData`` method to component:
+
+```
+constructor(props) {
+  ...
+  this.loadData = this.loadData.bind(this);
+}
+
+...
+
+
+loadData(){
+  dispatch({ type: 'GET_MOVIES' });
+}
+
+...
+
+```
+
+- add a button to trigger the loading of the data to render, and add conditional rendering so table is loaded only once data has arrived
+
+```
+...
+
+render() {
+  const { loading, loaded, error, movies, imageUrl } = this.props.Data;
+  if ( !loaded && !loading && !error ) {
+    return (
+      <button onClick={ this.loadData() }>
+      Click me to load some movies!
+      </button>
+    )
+  } else if ( !loaded && loading && !error ) {
+    return (
+      <div>LOADING</div>
+    )
+  } else if ( !loaded && !loading && error ) {
+    return (
+        <div>ERROR! ERROR! ERROR!</div>
+    )
+  } else if ( loaded && !loading && !error ) {
+    return (
+      <Table />
+        {
+          movies.map ( el => {
+            ...
+          })
+        }
+      <Table>
+    )
+  }
+}
+```
 
 
 
