@@ -156,7 +156,7 @@ return (
 
 ### Part 3 -- bringing in data
 
-Put real data into your react app via ``fetch``
+Put real data into your react app using ``axios``, a fully-featured and reliable http client. Take advantage of component state.
 
 - ``npm add axios`` or ``yarn add axios`` 
 - ``import axios as Axios from 'axios';`` => ``App.js``
@@ -167,7 +167,8 @@ constructor(props) {
   super(props);
   this.state = {
     movies: {},
-    imageUrl: null
+    imageUrl: null,
+    loading: true
   }
 }
 
@@ -181,7 +182,7 @@ componentDidMount() {
   .then ( () => {
     Axios.get(https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b)
     .then( res => {
-      this.setState({ imageUrl: res.images.base_url + res.images.poster_sizes[0] })
+      this.setState({ imageUrl: res.images.base_url + res.images.poster_sizes[0], loading: false })
     })
   })
   .catch ( err => ( return ));
@@ -189,6 +190,21 @@ componentDidMount() {
 ```
 
 - change references to ``Movies`` import as source of data to ``this.state.movies`` eg ``this.state.movies['poster_path']. Except for ``poster_path`` should be ``this.state.imageUrl + this.state.moves['poster_path']``. Be sure to change the map function to the new API state too.
+
+-- change render to conditionally load
+
+``` 
+render () {
+  ...
+  if ( !this.state.loading ) {
+    return (
+      ... previous code
+    )
+  }
+  return (
+    <div>LOADING...</div>
+  )
+}
 
 
 ``//TODO: images``
