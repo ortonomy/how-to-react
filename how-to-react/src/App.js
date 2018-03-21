@@ -1,6 +1,6 @@
 // library dependencies
 import React, { Component } from 'react';
-import Axios from 'axios';
+import { connect } from 'react-redux';
 
 // component dependencies
 import Table from './components/Table';
@@ -9,32 +9,34 @@ import TableRow from './components/TableRow';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      movies: [],
-      loading: true,
-      imageUrl: null
-    }
+    this.loadData = this.loadData.bind(this);
   }
 
-  componentDidMount() {
-    Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018')
-    .then ( res => {
-      this.setState({ movies: res.data.results })
+  loadData() {
+    this.props.dispatch({
+      type: 'GET_MOVIES'
     })
-    .then ( () => {
-      Axios.get('https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b')
-      .then ( res => {
-        this.setState({imageUrl: res.data.images.base_url + res.data.images.poster_sizes[0], loading: false }) 
-      })
-    })
-    .catch ( err => ( console.log(err.message) ));
   }
 
   render() {
-    const { movies, loading, imageUrl } = this.state;
-    if ( !loading ) {
+    const { loading, loaded, error, movies, imageUrl } = this.props.Data;
+    if ( !loaded && !loading && !error ) {
       return (
-        <Table>
+        <button onClick={ this.loadData }>
+        Click me to load some movies!
+        </button>
+      )
+    } else if ( !loaded && loading && !error ) {
+      return (
+        <div>LOADING</div>
+      )
+    } else if ( !loaded && !loading && error ) {
+      return (
+          <div>ERROR! ERROR! ERROR!</div>
+      )
+    } else if ( loaded && !loading && !error ) {
+      return (
+        <Table >
           {
             movies.map( el => {
               return (
@@ -51,12 +53,10 @@ class App extends Component {
             })
           }
         </Table>
-      );
+      )
     }
-    return (
-      <div>LOADING</div>
-    )
   }
 }
 
-export default App;
+
+export default connect(state => ({ Data: state.Data }), dispatch => ({ dispatch: dispatch }))(App);
