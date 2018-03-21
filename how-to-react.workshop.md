@@ -157,7 +157,7 @@ return (
 )
 ```
 
-``//TODO: images``
+![partial](assets/images/partial.png)
 
 
 ### Part 3 -- bringing in data
@@ -223,7 +223,7 @@ render () {
 }
 ```
 
-``//TODO: images``
+![fullapp](assets/images/fullapp.png)
 
 ### Part 4 -- adding redux and logic for another time...
 
