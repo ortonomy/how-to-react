@@ -52,6 +52,9 @@ __This step can be found on branch ``dumb-app``__
 
 Now we'll create our app structure and fill it with our static data
 
+- ``npm install bootstrap@3.3.0`` or ``yarn add bootstrap@3.3.0``
+- copy ``bootstrap.css`` from ``node_modules/bootstrap/dist`` to ``public`` folder
+- add ``<link rel="stylesheet" href="%PUBLIC_URL%/bootstrap.css">`` to ``<head>`` of ``public/index.html``
 - create a folder ``components`` inside ``src`` and 2 folders inside ``Table`` and ``TableRow``
 - create ``index.js`` files inside each one and create a basic react component inside
 
@@ -71,6 +74,7 @@ export default Table
 
 ```
 
+- do the same for TableRow
 - create a folder inside ``src`` called ``api``
 - create a file called ``mock.js``. You can find the mock data on branch ``dumb-app`` in the ``src/api/`` folder
 
@@ -87,7 +91,7 @@ const Movies = [
   ...
 ];
 
-export Movies;
+export default Movies;
 ```
 
 #### Building up ``app.js``
@@ -101,17 +105,17 @@ export Movies;
   <table className="table table-hover">
     <caption>Most popular movies of 2018</caption>
       <thead>
-        <trow>
+        <tr>
           <th>Poster</th>
           <th>Title</th>
           <th>Overview</th>
           <th>Language</th>
           <th>Release date</th>
           <th>Popularity</th>
-        </trow>
+        </tr>
       </thead>
       <tbody>
-        { props.children }
+        { this.props.children }
       </tbody>
   </table>
 )
@@ -124,7 +128,8 @@ export Movies;
 ```
 { Movies.map( el => { 
     return (
-      <TableRow  
+      <TableRow 
+        key={el.title} 
         posterPath={el.poster_path}
         title={el.title}
         overview={el.overview}
@@ -141,13 +146,14 @@ export Movies;
 
 ```
 return (
-  <trow>
-    <td><img src={props.posterPath} ></td>
-    <td>props.title</td>
-    <td>props.overview</td>
-    <td>props.language</td>
-    <td>props.releaseDate</td>
-    <td>props.popularity</td>
+  <tr>
+    <td><img src={ this.props.posterPath } ></td>
+    <td>{ this.props.title }</td>
+    <td>{ this.props.overview }</td>
+    <td>{ this.props.language }</td>
+    <td>{ this.props.releaseDate }</td>
+    <td>{ this.props.popularity }</td>
+  <tr>
 )
 ```
 
