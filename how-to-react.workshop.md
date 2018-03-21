@@ -28,6 +28,8 @@ You must have these pacakges installed on your computer (preferably from Homebre
 
 ### Part 1 -- A simple react app
 
+__This step can be found on branch ``create-app``__
+
 Install ``create-react-app``, create an app, and run it:
 
 - ``npm install -g create-react-app``
@@ -42,7 +44,11 @@ Install ``create-react-app``, create an app, and run it:
 ![files](assets/images/files.png)
 
 
+
+
 ### Part 2 -- dumb components with static data
+
+__This step can be found on branch ``dumb-app``__
 
 Now we'll create our app structure and fill it with our static data
 
@@ -144,6 +150,52 @@ return (
     <td>props.popularity</td>
 )
 ```
+
+``//TODO: images``
+
+
+### Part 3 -- bringing in data
+
+Put real data into your react app via ``fetch``
+
+- ``npm add axios`` or ``yarn add axios`` 
+- ``import axios as Axios from 'axios';`` => ``App.js``
+- add react lifecycle method and state to app.js:
+
+```
+constructor(props) {
+  super(props);
+  this.state = {
+    movies: {},
+    imageUrl: null
+  }
+}
+
+...
+
+componentDidMount() {
+  Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018')
+  .then ( res => {
+    this.setState({ movies: res.results })
+  })
+  .then ( () => {
+    Axios.get(https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b)
+    .then( res => {
+      this.setState({ imageUrl: res.images.base_url + res.images.poster_sizes[0] })
+    })
+  })
+  .catch ( err => ( return ));
+}
+```
+
+- change references to ``Movies`` import as source of data to ``this.state.movies`` eg ``this.state.movies['poster_path']. Except for ``poster_path`` should be ``this.state.imageUrl + this.state.moves['poster_path']``. Be sure to change the map function to the new API state too.
+
+
+``//TODO: images``
+
+### Part 4 -- adding redux and logic for another time...
+
+
 
 
 
