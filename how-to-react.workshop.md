@@ -35,11 +35,11 @@ Install ``create-react-app``, create an app, and run it:
 - ``create-react-app [your-app-name]`` -- change ``[your-app-name]`` to whatever you want
 - ``cd [your-app-name] && npm start``
 
-![app](how-to-react/assets/images/app.png)
+![app](assets/images/app.png)
 
-![firstrun](how-to-react/assets/images/first_run.png)
+![firstrun](assets/images/first_run.png)
 
-![files](how-to-react/assets/images/files.png)
+![files](assets/images/files.png)
 
 
 ### Part 2 -- dumb components with static data
