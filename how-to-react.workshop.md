@@ -240,7 +240,7 @@ Next step is to remove API calls from components. Can be done in higher order co
 ``` 
 // library dependencies
 import React, { Component } from 'react'
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { createLogicMiddleware } from 'redux-logic';
 import { Provider } from 'react-redux';
 
@@ -264,7 +264,7 @@ const initialState = {
 const logicDependencies = {};
 
 const configureStore = () => {
-  const logicMiddleware = createLogicMiddleware(rootLogic, deps); // create logic middleware
+  const logicMiddleware = createLogicMiddleware(rootLogic, logicDependencies); // create logic middleware
   const middleware = applyMiddleware(logicMiddleware); // apply middleware to redux dispatch
   return createStore(rootReducer, initialState, middleware); // create the store
 }
@@ -345,48 +345,29 @@ export const getMoviesLogic = createLogic(
       allow(action);
     },
     process: ({ action }, dispatch, done) => { // side effects of action
-      Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018')
-      .then ( res => {
-        return res.data;
-      })
-      .then ( data => {
+      Axios.all([
+        Axios.get('https://api.themoviedb.org/3/discover/movie?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&year=2018'),
         Axios.get('https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b')
-        .then ( res => {
-          dispatch({
-            type: 'GET_MOVIES_SUCCESS',
-            payload: {
-              movies: data.results,
-              imageUrl: res.data.images.base_url + res.data.images.poster_sizes[0]
-            }
-          })
-        })
-      })
-      .catch ( err => {
+      ])
+      .then( Axios.spread( (movies, config) => {
+        dispatch({
+          type: 'GET_MOVIES_SUCCESS',
+          payload: { movies: movies.data.results, imageUrl: config.data.images.base_url + config.data.images.poster_sizes[0]}
+        });
+      }))
+      .catch( err => {
         dispatch({
           type: 'GET_MOVIES_FAIL',
           payload: err.message,
           err: true
-        })
-      }) 
-      .then( done() );
-  }
-)
-
-export const getMoviesSuccessLogic = createLogic(
-  {
-    type: 'GET_MOVIES_SUCCESS',
-    validate: ({ action }, allow, reject) => {
-      if ( action.type !== 'GET_MOVIES_SUCCESS' && !action.payload ) {
-        reject();
-      }
-      allow(action);
+        });
+      })
     }
   }
 )
 
 export default [
-  getMoviesLogic,
-  getMoviesSuccessLogic
+  getMoviesLogic
 ]
 ```
 
@@ -427,19 +408,14 @@ import { connect } from 'react-redux';
 
 // other imports
 
-...
 
-
-@connect(
-  state => ({
-    Data: state.Data
-  }),
-  dispatch
-)
-... // component declaration
+... // after component declaration
+export default connect(state => ({ Data: state.Data }), dispatch => ({ dispatch: dispatch }))(App);
 
 ```
+
 - add a ``loadData`` method to component:
+
 
 ```
 constructor(props) {
@@ -466,33 +442,39 @@ loadData(){
 render() {
   const { loading, loaded, error, movies, imageUrl } = this.props.Data;
   if ( !loaded && !loading && !error ) {
+	  return (
+	    <button onClick={ this.loadData }>
+	    Click me to load some movies!
+	    </button>
+	  )
+	} else if ( !loaded && loading && !error ) {
+	  return (
+	    <div>LOADING</div>
+	  )
+	} else if ( !loaded && !loading && error ) {
+	  return (
+	      <div>ERROR! ERROR! ERROR!</div>
+	  )
+	} else if ( loaded && !loading && !error ) {
     return (
-      <button onClick={ this.loadData() }>
-      Click me to load some movies!
-      </button>
-    )
-  } else if ( !loaded && loading && !error ) {
-    return (
-      <div>LOADING</div>
-    )
-  } else if ( !loaded && !loading && error ) {
-    return (
-        <div>ERROR! ERROR! ERROR!</div>
-    )
-  } else if ( loaded && !loading && !error ) {
-    return (
-      <Table />
+      <Table>
         {
           movies.map ( el => {
             ...
           })
         }
-      <Table>
+      </ Table>
     )
   }
 }
 ```
 
+- replace import of ``App`` in ``index.js`` with ``Redux`` and make sure initial React binding is to Redux component:
+
+```
+```
+
+- remove ``Axios`` import from ``app.js`` -- it's now redundant
 
 
 
