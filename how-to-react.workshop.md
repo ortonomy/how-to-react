@@ -198,7 +198,7 @@ componentDidMount() {
 }
 ```
 
-- change references to ``Movies`` import as source of data, and extract the items from state before using them (see below) to ``movies`` eg ``movies['poster_path']. Except for ``poster_path`` should be ``imageUrl + movies['poster_path']``. Be sure to change the map function to the new API state too.
+- change references to ``Movies`` import as source of data, and extract the items from state before using them (see below) to ``movies`` eg ``movies['poster_path']``. Except for ``poster_path`` should be ``imageUrl + movies['poster_path']``. Be sure to change the map function to the new API state too.
 -- change render to conditionally load
 
 ``` 
@@ -235,7 +235,7 @@ Next step is to remove API calls from components. Can be done in higher order co
 #### setting up redux infrastructure
 
 - ``npm install redux redux-logic react-redux`` or ``yarn add redux redux-logic react-redux``
-- create a new file called ``Redux.js`` in file root and add:
+- create a new file called ``Redux.js`` in root of ``src`` and add:
 
 ``` 
 // library dependencies
