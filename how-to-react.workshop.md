@@ -189,12 +189,12 @@ componentDidMount() {
     this.setState({ movies: res.data.results })
   })
   .then ( () => {
-    Axios.get(https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b)
+    Axios.get('https://api.themoviedb.org/3/configuration?api_key=6f2b8b61c03afbeccc25962cf9ed8f5b')
     .then( res => {
       this.setState({ imageUrl: res.data.images.base_url + res.data.images.poster_sizes[0], loading: false })
     })
   })
-  .catch ( err => ( return ));
+  .catch ( err => ());
 }
 ```
 
