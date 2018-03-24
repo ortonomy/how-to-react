@@ -427,7 +427,7 @@ constructor(props) {
 
 
 loadData(){
-  dispatch({ type: 'GET_MOVIES' });
+  this.props.dispatch({ type: 'GET_MOVIES' });
 }
 
 ...
