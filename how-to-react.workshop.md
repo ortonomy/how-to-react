@@ -123,7 +123,7 @@ export default Movies;
 
 - ``import TableRow from './components/TableRow'``
 - ``import Movies from './api/mock.js'``
-- inside ``<Table>``:
+- inside ``<Table> </Table>``, add this:
 
 ```
 { Movies.map( el => { 
@@ -153,7 +153,7 @@ return (
     <td>{ this.props.language }</td>
     <td>{ this.props.releaseDate }</td>
     <td>{ this.props.popularity }</td>
-  <tr>
+  </tr>
 )
 ```
 
