@@ -167,7 +167,7 @@ __This step can be found on branch ``api-driven-app``__
 
 Put real data into your react app using ``axios``, a fully-featured and reliable http client. Take advantage of component state.
 
-- ``npm add axios`` or ``yarn add axios`` 
+- ``npm add axios`` (or ``npm install`` for old versions of npm) or ``yarn add axios`` 
 - ``import Axios from 'axios';`` => ``App.js``
 - add react lifecycle method and state to app.js:
 
